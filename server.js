@@ -74,6 +74,22 @@ app.post('/todos', function (req, res) {
 	res.json(accceptedBody);
 });
 
+//DELETE
+app.delete('/todos/:id', function(req, res) {
+	var toDeleteId = parseInt(req.params.id,10);
+	var matchedTodo = _.findWhere(todos,{id : toDeleteId});
+
+	if (matchedTodo) {
+		todos = _.without(todos, matchedTodo);
+		res.send(matchedTodo)	
+	} else {
+		res.status(404).json({"error":"No matching id"});
+	}
+
+
+
+});
+
 app.listen(PORT, function () {
 	console.log('Express listening on port ' + PORT);
 });
