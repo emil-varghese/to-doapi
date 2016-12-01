@@ -28,22 +28,30 @@ app.get('/', function(req, res) {
 	res.send('ToDo API Root');
 });
 
-//GET Todos?completed=true
+//GET Todos?completed=true&q=description
 app.get('/todos', function(req, res) {
 	var queryParams = req.query;
 	var filteredTodos = todos;
-	var param1
-	console.log(queryParams);
+	var completedParam;
+
+	//console.log(queryParams);
 
 	if (queryParams.hasOwnProperty('completed') && _.isString(queryParams.completed)
 			&& queryParams.completed.trim().length > 0 ) {
-		param1 = queryParams.completed;
+		completedParam = queryParams.completed;
+	}
 
-		if (param1 === 'true') {
-			filteredTodos = _.where(filteredTodos,{completed: true});
-		} else if (param1 === 'false'){
-			filteredTodos = _.where(filteredTodos,{completed: false});
-		}
+	if (queryParams.hasOwnProperty('q') && queryParams.q.trim().length > 0 ){
+
+		filteredTodos = _.filter(filteredTodos, function (todo) {
+			return todo.description.indexOf(queryParams.q) > -1;
+		});
+	}
+
+	if (completedParam === 'true') {
+		filteredTodos = _.where(filteredTodos,{completed: true});
+	} else if (completedParam === 'false'){
+		filteredTodos = _.where(filteredTodos,{completed: false});
 	}
 
 	res.send(filteredTodos);
