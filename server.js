@@ -123,19 +123,20 @@ app.put('/todos/:id', function(req, res) {
 		attributes.description = body.description;
 	}
 
-	db.todo.findById(todoId).then (function (todo) {
+	db.todo.findById(todoId).then(function(todo) {
 		if (todo) {
-			return todo.update(attributes)
+			todo.update(attributes).then(function(todo) {
+				res.json(todo.toJSON());
+			}, function(e) {
+				res.status(400).json(e);
+			});
+			
 		} else {
 			res.status(404).send();
 		}
-	}, function () {
+	}, function() {
 		res.status(500).send();
-	}).then (function (todo) {
-		res.json(todo.toJSON());
-	}, function(e){
-		res.status(400).json(e);
-	})
+	});
 
 });
 
