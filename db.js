@@ -4,7 +4,10 @@ var sequelize;
 console.log(process.env.DATABASE_URL);
 if (env === 'production') {
 	sequelize = new Sequelize(process.env.DATABASE_URL, {
-		dialect: 'postgres'
+		dialect: 'postgres',
+		dialectOptions: {
+    		ssl: true
+  		}
 	});
 } else {
 	sequelize = new Sequelize(undefined, undefined, undefined, {
