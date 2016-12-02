@@ -39,18 +39,20 @@ app.get('/todos', function(req, res) {
 		} else if (query.completed === 'false') {
 			where.completed = false;
 		}
-	} 
+	}
 
 	if (query.hasOwnProperty('q') && query.q.trim().length > 0) {
 		where.description = {
-					$like: '%'+query.q.trim()+'%'
-				};
+			$like: '%' + query.q.trim() + '%'
+		};
 	}
 	console.log(where);
 
-	db.todo.findAll({where: where}).then (function(todos) {
+	db.todo.findAll({
+		where: where
+	}).then(function(todos) {
 		res.send(todos);
-	}).catch (function (e) {
+	}).catch(function(e) {
 		res.status(500).send();
 	});
 
@@ -60,13 +62,13 @@ app.get('/todos', function(req, res) {
 app.get('/todos/:id', function(req, res) {
 	var todoId = parseInt(req.params.id, 10);
 
-	db.todo.findById(todoId).then(function (todo){
+	db.todo.findById(todoId).then(function(todo) {
 		if (!!todo) { //Boolean true
 			res.send(todo.toJSON());
 		} else {
 			res.status(404).send();
 		}
-	}, function (e) {
+	}, function(e) {
 		res.status(500).send();
 	});
 });
@@ -75,9 +77,9 @@ app.get('/todos/:id', function(req, res) {
 app.post('/todos', function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed');
 
-	db.todo.create(body).then(function (todo) {
+	db.todo.create(body).then(function(todo) {
 		res.json(todo.toJSON());
-	}).catch(function (e) {
+	}).catch(function(e) {
 		res.status(400).json(e);
 	});
 
@@ -86,18 +88,25 @@ app.post('/todos', function(req, res) {
 //DELETE
 app.delete('/todos/:id', function(req, res) {
 	var toDeleteId = parseInt(req.params.id, 10);
-	var matchedTodo = _.findWhere(todos, {
-		id: toDeleteId
-	});
+	var where = {};
+	where.id = toDeleteId;
 
-	if (matchedTodo) {
-		todos = _.without(todos, matchedTodo);
-		res.send(matchedTodo)
-	} else {
-		res.status(404).json({
-			"error": "No matching id"
-		});
-	}
+	db.todo.destroy({
+		where: where
+	}).then(function(rowsDeleted) {
+		if (rowsDeleted === 0) {
+			res.status(404).json({
+				"error": "Not found with id"
+			});
+		} else {
+			res.status(200).json({
+				"success": rowsDeleted + " items deleted"
+			});
+		}
+
+	}).catch(function(e) {
+		res.status(500).send();
+	});
 });
 
 //PUT
