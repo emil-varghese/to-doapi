@@ -1,7 +1,7 @@
 var Sequelize = require('sequelize');
 var env = process.env.NODE_ENV || 'development';
 var sequelize; 
-console.log(process.env.DATABASE_URL);
+//console.log(process.env.DATABASE_URL);
 if (env === 'production') {
 	sequelize = new Sequelize(process.env.DATABASE_URL, {
 		dialect: 'postgres',
@@ -19,6 +19,7 @@ if (env === 'production') {
 var db = {};
 
 db.todo = sequelize.import(__dirname + '/model/todo.js');
+db.user = sequelize.import(__dirname + '/model/user.js');
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

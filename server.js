@@ -130,7 +130,7 @@ app.put('/todos/:id', function(req, res) {
 			}, function(e) {
 				res.status(400).json(e);
 			});
-			
+
 		} else {
 			res.status(404).send();
 		}
@@ -139,6 +139,20 @@ app.put('/todos/:id', function(req, res) {
 	});
 
 });
+
+//Users functions
+//Users POST
+app.post('/users', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password');
+
+	db.user.create(body).then(function(user) {
+		res.json(user.toJSON());
+	}).catch(function(e) {
+		res.status(400).json(e);
+	});
+
+});
+
 
 //Sync up DB
 db.sequelize.sync().then(function() {
