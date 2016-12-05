@@ -1,9 +1,11 @@
 var bcrypt = require('bcrypt');
 var _ = require('underscore');
+var cryptojs = require('crypto-js');
+var jwt = require('jsonwebtoken');
 
 module.exports = function(sequelize, DataTypes) {
 
-	var user =  sequelize.define('user', {
+	var user = sequelize.define('user', {
 		email: {
 			type: DataTypes.STRING,
 			allowNull: false,
@@ -45,7 +47,7 @@ module.exports = function(sequelize, DataTypes) {
 		},
 		classMethods: {
 			authenticate: function(body) {
-				return new Promise( function(resolve, reject) {
+				return new Promise(function(resolve, reject) {
 
 					if (typeof body.email !== 'string' || typeof body.password !== 'string') {
 						return reject();
@@ -57,7 +59,7 @@ module.exports = function(sequelize, DataTypes) {
 						}
 					}).then(function(user) {
 						if (!user || !bcrypt.compareSync(body.password, user.get('password_hash'))) {
-							return reject();		
+							return reject();
 						} else {
 							resolve(user);
 						}
@@ -72,6 +74,32 @@ module.exports = function(sequelize, DataTypes) {
 			toPublicJSON: function() {
 				var json = this.toJSON();
 				return _.pick(json, 'id', 'email', 'createdAt', 'updatedAt');
+			},
+			generateToken: function(type) {
+				if (!_.isString(type)) {
+					return undefined;
+				}
+
+				try {
+					//Takes users id and type and turns to JSON string
+					//AES encrypt only works on strings. Type is usually Authenticate
+					var stringData = JSON.stringify({
+						id: this.get('id'),
+						type: type
+					});
+					//AES encryption, string data + secrect password. retruns encypted string
+					var encryptedData = cryptojs.AES.encrypt(stringData, 'abc123').toString();
+					//Create JSON web token
+					var token = jwt.sign({
+						token: encryptedData,
+					}, 'qwerty123'); //JWT password
+
+					return token;
+
+				} catch (e) {
+					//console.error(e);
+					return undefined;
+				}
 			}
 		}
 	});
